@@ -3,7 +3,9 @@ import FullCalendar from "@fullcalendar/react"; // must go before plugins
 import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 import timeGridDay from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClick
-import usePortal from "react-cool-portal";
+
+import "./styles.scss";
+import useModal from "./useModal";
 
 let scheduledEvents = JSON.parse(localStorage.getItem("events")) || [
   {
@@ -16,7 +18,8 @@ let scheduledEvents = JSON.parse(localStorage.getItem("events")) || [
 ];
 
 const DemoApp = () => {
-  const { Portal } = usePortal();
+  const { Modal, show, hide, isShow } = useModal();
+
   const [scheduledEventsArray, setScheduledEventsArray] =
     useState(scheduledEvents);
 
@@ -49,6 +52,7 @@ const DemoApp = () => {
 
   const select = (event) => {
     console.log(`eventClick`, event);
+    show();
     scheduledEvents.push({
       title: "event 3",
       start: event.hasOwnProperty("dateStr")
@@ -64,39 +68,80 @@ const DemoApp = () => {
     console.log(scheduledEventsArray);
   };
 
+  const editEvent = () => {};
+
+  const deleteEvent = () => {};
+
   return (
     <>
-      <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin, timeGridDay]}
-        headerToolbar={{
-          left: "prev,next today",
-          center: "title",
-          right: "timeGridDay,timeGridWeek,dayGridMonth",
-        }}
-        initialView="dayGridMonth"
-        weekends
-        events={scheduledEventsArray}
-        eventClick={(info) => {
-          info.jsEvent.preventDefault(); // don't let the browser navigate
-          console.log(`info`, info);
+      <div style={{ marginTop: "100px" }}>
+        <FullCalendar
+          plugins={[dayGridPlugin, interactionPlugin, timeGridDay]}
+          headerToolbar={{
+            left: "prev,next today",
+            center: "title",
+            right: "timeGridDay,timeGridWeek,dayGridMonth",
+          }}
+          initialView="dayGridMonth"
+          weekends
+          events={scheduledEventsArray}
+          eventClick={(info) => {
+            info.jsEvent.preventDefault(); // don't let the browser navigate
+            console.log(`info`, info);
+            show();
+            document.documentElement.scrollTop = 0;
 
-          if (info.event.url) {
-            window.open(info.event.url);
-          }
-        }}
-        eventMouseEnter={(Info) => console.log("Info ", Info)}
-        selectable
-        selectMirror
-        unselectAuto
-        selectOverlap
-        select={select}
-        dateClick={handleDateClick}
-      />
-      <Portal>
-        <p>
-          Wow! I am rendered outside the DOM hierarchy of my parent component.
-        </p>
-      </Portal>
+            if (info.event.url) {
+              window.open(info.event.url);
+            }
+          }}
+          eventMouseEnter={(Info) => console.log("Info ", Info)}
+          selectable
+          selectMirror
+          unselectAuto
+          selectOverlap
+          select={select}
+          dateClick={handleDateClick}
+        />
+      </div>
+      <Modal isShow={isShow}>
+        <div
+          className="modal-dialog"
+          role="dialog"
+          aria-labelledby="modal-label"
+          aria-modal="true"
+        >
+          <div className="modal-header" onClick={hide}>
+            <h5 id="modal-label" className="modal-title">
+              <span role="img" aria-label="Hello">
+                👋🏻
+              </span>{" "}
+              Da li zelite da izmjenite ili obrisete Event?
+            </h5>
+            <button
+              className="modal-close"
+              onClick={hide}
+              type="button"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div className="modal-body">
+            <p>Mozete zatvoriti modal pritiskom na &quot;ESC&quot; dugme.</p>
+            <button className="btn" onClick={editEvent} type="button">
+              Izmjeni
+            </button>
+            <button
+              className="btn"
+              onClick={(event) => deleteEvent(event)}
+              type="button"
+            >
+              Obrisi
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };
