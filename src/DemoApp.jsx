@@ -7,15 +7,18 @@ import interactionPlugin from "@fullcalendar/interaction"; // needed for dayClic
 import "./styles.scss";
 import useModal from "./useModal";
 
-let scheduledEvents = JSON.parse(localStorage.getItem("events")) || [
-  {
-    title: "event 1",
-    start: "2021-10-11",
-    end: "2021-10-13",
-    allDay: false,
-  },
-  { title: "event 2", date: "2021-10-12" },
-];
+let scheduledEvents =
+  localStorage.getItem("events") != null
+    ? JSON.parse(decodeURI(localStorage.getItem("events")))
+    : [
+        {
+          title: "event 1",
+          start: "2021-10-11",
+          end: "2021-10-13",
+          allDay: false,
+        },
+        { title: "event 2", date: "2021-10-12" },
+      ];
 
 const DemoApp = () => {
   const { Modal, show, hide, isShow } = useModal();
@@ -46,13 +49,15 @@ const DemoApp = () => {
           }
     );
     setScheduledEventsArray(scheduledEvents);
-    localStorage.setItem("events", JSON.stringify(scheduledEventsArray));
+    localStorage.setItem(
+      "events",
+      encodeURI(JSON.stringify(scheduledEventsArray))
+    );
     console.log(scheduledEventsArray);
   };
 
   const select = (event) => {
     console.log(`eventClick`, event);
-    show();
     scheduledEvents.push({
       title: "event 3",
       start: event.hasOwnProperty("dateStr")
@@ -64,7 +69,10 @@ const DemoApp = () => {
       allDay: event.hasOwnProperty("startStr") ? false : event.allDay,
     });
     setScheduledEventsArray(scheduledEvents);
-    localStorage.setItem("events", JSON.stringify(scheduledEventsArray));
+    localStorage.setItem(
+      "events",
+      encodeURI(JSON.stringify(scheduledEventsArray))
+    );
     console.log(scheduledEventsArray);
   };
 
